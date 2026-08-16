@@ -1,0 +1,126 @@
+{
+  "name": "dsh-vibe-pack",
+  "version": "1.0.0",
+  "description": "Transactional data-only DSH configuration packs with integrity, ownership, and rollback",
+  "type": "module",
+  "main": "./packages/dsh-vibe-pack/lib/index.js",
+  "types": "./packages/dsh-vibe-pack/lib/index.d.ts",
+  "bin": {
+    "dsh-pack": "./packages/dsh-vibe-pack/lib/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./packages/dsh-vibe-pack/lib/index.d.ts",
+      "default": "./packages/dsh-vibe-pack/lib/index.js"
+    },
+    "./client": {
+      "types": "./packages/dsh-vibe-pack/lib/client.d.ts",
+      "default": "./packages/dsh-vibe-pack/lib/client.js"
+    },
+    "./typert": {
+      "types": "./packages/dsh-vibe-pack/lib/typert.host.d.ts",
+      "default": "./packages/dsh-vibe-pack/lib/typert.host.js"
+    },
+    "./remote": {
+      "types": "./packages/dsh-vibe-pack/lib/typert.remote-client.d.ts",
+      "default": "./packages/dsh-vibe-pack/lib/typert.remote-client.js"
+    },
+    "./types": {
+      "types": "./packages/dsh-vibe-pack/lib/index.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "packages/dsh-vibe-pack/lib/*.js",
+    "packages/dsh-vibe-pack/lib/*.d.ts",
+    "packages/dsh-vibe-pack/lib/*.js.map",
+    "packages/dsh-vibe-pack/lib/*.d.ts.map",
+    "cordis.patch.yml",
+    "README.md",
+    "README.zh-CN.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "TEST_PLAN.md"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-api-remotes",
+        "@deepseek-ai/dsh-client-runtime",
+        "@deepseek-ai/dsh-client-ui-settings",
+        "@deepseek-ai/dsh-client-ui-theme"
+      ]
+    }
+  },
+  "scripts": {
+    "build": "corepack pnpm run build:host && corepack pnpm run build:client",
+    "build:host": "corepack pnpm --dir packages/dsh-vibe-pack run build:host",
+    "build:client": "corepack pnpm --dir packages/dsh-vibe-pack run build:client",
+    "clean": "corepack pnpm --dir packages/dsh-vibe-pack run clean",
+    "typecheck": "corepack pnpm --dir packages/dsh-vibe-pack run typecheck",
+    "test": "vitest run",
+    "pack:check": "node scripts/verify-package.mjs && npm pack --dry-run",
+    "prepack": "node scripts/verify-package.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LeemanCheung/dsh-vibe-pack.git"
+  },
+  "bugs": {
+    "url": "https://github.com/LeemanCheung/dsh-vibe-pack/issues"
+  },
+  "homepage": "https://github.com/LeemanCheung/dsh-vibe-pack#readme",
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "cordis"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  },
+  "packageManager": "pnpm@11.7.0",
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/dsh-api-remotes": "^0.1.0-rc.6",
+    "@deepseek-ai/dsh-client-runtime": "^0.1.0-rc.6",
+    "@deepseek-ai/dsh-client-ui-settings": "^0.1.0-rc.6",
+    "@deepseek-ai/dsh-client-ui-slots": "^0.1.0-rc.6",
+    "@deepseek-ai/dsh-home-paths": "^0.1.0-rc.6",
+    "@deepseek-ai/dsh-storage-domain": "^0.1.0-rc.6",
+    "@deepseek-ai/dsh-typert-protocol": "^0.1.0-rc.6",
+    "react": "^18.2.0"
+  },
+  "dependencies": {
+    "commander": "^15.0.0",
+    "fflate": "^0.8.2",
+    "js-yaml": "^4.2.0",
+    "semver": "^7.7.2",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@deepseek-ai/dsh-typert-generator": "0.1.0-rc.6",
+    "@types/node": "^22.20.0",
+    "@types/react": "~18.3.1",
+    "lightningcss": "^1.32.0",
+    "tsdown": "^0.22.2",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.8",
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/dsh-api-remotes": "^0.1.0-rc.6",
+    "@deepseek-ai/dsh-client-runtime": "^0.1.0-rc.6",
+    "@deepseek-ai/dsh-client-ui-settings": "^0.1.0-rc.6",
+    "@deepseek-ai/dsh-client-ui-slots": "^0.1.0-rc.6",
+    "@deepseek-ai/dsh-home-paths": "^0.1.0-rc.6",
+    "@deepseek-ai/dsh-storage-domain": "^0.1.0-rc.6",
+    "@deepseek-ai/dsh-typert-protocol": "^0.1.0-rc.6",
+    "react": "^18.2.0",
+    "@types/js-yaml": "^4.0.9",
+    "@types/semver": "^7.7.1"
+  }
+}
