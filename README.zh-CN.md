@@ -4,6 +4,12 @@
 
 面向 DeepSeek Harness 的事务性纯数据包管理器：预览、安装、比较、导出和卸载 `$DSH_HOME` 下的独立版本资源，同时记录归属并保护用户修改。
 
+## 界面截图
+
+![Vibe Pack 已审阅安装计划](https://raw.githubusercontent.com/LeemanCheung/dsh-vibe-pack/main/assets/screenshots/overview.png)
+
+> 使用 GPT Image 根据已实现的 Client 布局和功能生成；实际外观会随 DSH 主题和视口变化。
+
 ## 包格式
 
 来源是本地目录，或 ZIP 兼容的 `.dshpack`/`.zip` 归档，其中包含 `dshpack.yaml` 和清单声明的全部载荷。严格的版本 1 清单包含 id、版本、兼容范围、1–10,000 个文件、每个文件的 SHA-256、create/replace/merge 模式、归属元数据和有大小限制的展示元数据。

@@ -4,6 +4,12 @@ English | [中文](README.zh-CN.md)
 
 A transactional, data-only configuration pack manager for DeepSeek Harness. It previews, installs, diffs, exports, and uninstalls independently versioned resources under `$DSH_HOME` while tracking ownership and protecting user modifications.
 
+## Screenshot
+
+![Vibe Pack reviewed install plan](https://raw.githubusercontent.com/LeemanCheung/dsh-vibe-pack/main/assets/screenshots/overview.png)
+
+> Generated with GPT Image from the implemented Client layout and feature set; runtime appearance follows the active DSH theme and viewport.
+
 ## Pack format
 
 A source is a local directory or a ZIP-compatible `.dshpack`/`.zip` archive containing `dshpack.yaml` and every manifest-listed payload. The strict version-1 manifest contains an id, version, compatibility ranges, 1–10,000 files, SHA-256 for every file, create/replace/merge modes, ownership metadata, and bounded display metadata.
