@@ -1,0 +1,6 @@
+# Data-only pack manager. Pack-provided executable code is never mounted.
+- insert:
+    - id: vibe-pack
+      name: dsh-vibe-pack
+      config:
+        root: !!js dshHomePath()
