@@ -36,16 +36,16 @@ const dsh_vibe_pack_vibePack_history_result$schema = z.object({
 }),
 })),
 })
-const dsh_vibe_pack_vibePack_install_parameter_0$schema = z.union([z.object({
+const dsh_vibe_pack_vibePack_installPack_parameter_0$schema = z.union([z.object({
   'kind': z.literal("directory"),
   'path': z.string(),
 }), z.object({
   'kind': z.literal("archive"),
   'path': z.string(),
 })])
-const dsh_vibe_pack_vibePack_install_parameter_1$schema = z.boolean()
-const dsh_vibe_pack_vibePack_install_parameter_2$schema = z.string()
-const dsh_vibe_pack_vibePack_install_result$schema = z.object({
+const dsh_vibe_pack_vibePack_installPack_parameter_1$schema = z.boolean()
+const dsh_vibe_pack_vibePack_installPack_parameter_2$schema = z.string()
+const dsh_vibe_pack_vibePack_installPack_result$schema = z.object({
   'pack': z.object({
   'id': z.string(),
   'version': z.string(),
@@ -156,10 +156,11 @@ export const TYPERT = {
       sourceLocation: {"file":"packages/dsh-vibe-pack/src/index.ts","line":30,"column":28},
     },
     {
-      id: 'dsh-vibe-pack#vibePack/install',
+      id: 'dsh-vibe-pack#vibePack/installPack',
       service: 'vibePack',
       namespace: 'vibePack',
-      method: 'install',
+      method: 'installPack',
+      implementation: 'install',
       invocation: { kind: 'direct' },
       parameters: [
         {
@@ -169,7 +170,7 @@ export const TYPERT = {
           codec: {
             mode: 'strict',
             typeSymbol: 'dsh-vibe-pack/types#SourceSpec',
-            schema: dsh_vibe_pack_vibePack_install_parameter_0$schema,
+            schema: dsh_vibe_pack_vibePack_installPack_parameter_0$schema,
           },
         },
         {
@@ -178,8 +179,8 @@ export const TYPERT = {
           source: 'json',
           codec: {
             mode: 'strict',
-            typeSymbol: 'dsh-vibe-pack#vibePack/install:force',
-            schema: dsh_vibe_pack_vibePack_install_parameter_1$schema,
+            typeSymbol: 'dsh-vibe-pack#vibePack/installPack:force',
+            schema: dsh_vibe_pack_vibePack_installPack_parameter_1$schema,
           },
         },
         {
@@ -188,17 +189,17 @@ export const TYPERT = {
           source: 'json',
           codec: {
             mode: 'strict',
-            typeSymbol: 'dsh-vibe-pack#vibePack/install:expectedDigest',
-            schema: dsh_vibe_pack_vibePack_install_parameter_2$schema,
+            typeSymbol: 'dsh-vibe-pack#vibePack/installPack:expectedDigest',
+            schema: dsh_vibe_pack_vibePack_installPack_parameter_2$schema,
           },
         },
       ],
       result: {
         mode: 'strict',
         typeSymbol: 'dsh-vibe-pack/types#InstallPlan',
-        schema: dsh_vibe_pack_vibePack_install_result$schema,
+        schema: dsh_vibe_pack_vibePack_installPack_result$schema,
       },
-      sourceLocation: {"file":"packages/dsh-vibe-pack/src/index.ts","line":32,"column":28},
+      sourceLocation: {"file":"packages/dsh-vibe-pack/src/index.ts","line":32,"column":32},
     },
     {
       id: 'dsh-vibe-pack#vibePack/plan',
@@ -284,7 +285,7 @@ export const TYPERT = {
           {
             "kind": "method",
             "name": "install",
-            "signature": "@Remote('install') async install(source: SourceSpec, force: boolean, expectedDigest: string): Promise<InstallPlan>"
+            "signature": "@Remote('installPack') async install(source: SourceSpec, force: boolean, expectedDigest: string): Promise<InstallPlan>"
           },
           {
             "kind": "method",

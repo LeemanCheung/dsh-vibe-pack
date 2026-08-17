@@ -10,7 +10,7 @@ declare module '@deepseek-ai/dsh-typert-protocol' {
     diff: (id: string) => Promise<RemoteResult<Change[]>>
     export: (id: string) => Promise<RemoteResult<string>>
     history: () => Promise<RemoteResult<PackLedger>>
-    install: (source: SourceSpec, force: boolean, expectedDigest: string) => Promise<RemoteResult<InstallPlan>>
+    installPack: (source: SourceSpec, force: boolean, expectedDigest: string) => Promise<RemoteResult<InstallPlan>>
     plan: (source: SourceSpec) => Promise<RemoteResult<InstallPlan>>
     uninstall: (id: string, force: boolean) => Promise<RemoteResult<void>>
   }
@@ -18,7 +18,7 @@ declare module '@deepseek-ai/dsh-typert-protocol' {
     'vibePack/diff': (id: string) => Promise<RemoteResult<Change[]>>
     'vibePack/export': (id: string) => Promise<RemoteResult<string>>
     'vibePack/history': () => Promise<RemoteResult<PackLedger>>
-    'vibePack/install': (source: SourceSpec, force: boolean, expectedDigest: string) => Promise<RemoteResult<InstallPlan>>
+    'vibePack/installPack': (source: SourceSpec, force: boolean, expectedDigest: string) => Promise<RemoteResult<InstallPlan>>
     'vibePack/plan': (source: SourceSpec) => Promise<RemoteResult<InstallPlan>>
     'vibePack/uninstall': (id: string, force: boolean) => Promise<RemoteResult<void>>
   }

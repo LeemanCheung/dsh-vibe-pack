@@ -4017,16 +4017,16 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
 				})
 			}))
 		});
-		const dsh_vibe_pack_vibePack_install_parameter_0$schema = union([object({
+		const dsh_vibe_pack_vibePack_installPack_parameter_0$schema = union([object({
 			"kind": literal("directory"),
 			"path": string()
 		}), object({
 			"kind": literal("archive"),
 			"path": string()
 		})]);
-		const dsh_vibe_pack_vibePack_install_parameter_1$schema = boolean();
-		const dsh_vibe_pack_vibePack_install_parameter_2$schema = string();
-		const dsh_vibe_pack_vibePack_install_result$schema = object({
+		const dsh_vibe_pack_vibePack_installPack_parameter_1$schema = boolean();
+		const dsh_vibe_pack_vibePack_installPack_parameter_2$schema = string();
+		const dsh_vibe_pack_vibePack_installPack_result$schema = object({
 			"pack": object({
 				"id": string(),
 				"version": string()
@@ -4148,10 +4148,11 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
 					}
 				},
 				{
-					id: "dsh-vibe-pack#vibePack/install",
+					id: "dsh-vibe-pack#vibePack/installPack",
 					service: "vibePack",
 					namespace: "vibePack",
-					method: "install",
+					method: "installPack",
+					implementation: "install",
 					invocation: { kind: "direct" },
 					parameters: [
 						{
@@ -4161,7 +4162,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
 							codec: {
 								mode: "strict",
 								typeSymbol: "dsh-vibe-pack/types#SourceSpec",
-								schema: dsh_vibe_pack_vibePack_install_parameter_0$schema
+								schema: dsh_vibe_pack_vibePack_installPack_parameter_0$schema
 							}
 						},
 						{
@@ -4170,8 +4171,8 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
 							source: "json",
 							codec: {
 								mode: "strict",
-								typeSymbol: "dsh-vibe-pack#vibePack/install:force",
-								schema: dsh_vibe_pack_vibePack_install_parameter_1$schema
+								typeSymbol: "dsh-vibe-pack#vibePack/installPack:force",
+								schema: dsh_vibe_pack_vibePack_installPack_parameter_1$schema
 							}
 						},
 						{
@@ -4180,20 +4181,20 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
 							source: "json",
 							codec: {
 								mode: "strict",
-								typeSymbol: "dsh-vibe-pack#vibePack/install:expectedDigest",
-								schema: dsh_vibe_pack_vibePack_install_parameter_2$schema
+								typeSymbol: "dsh-vibe-pack#vibePack/installPack:expectedDigest",
+								schema: dsh_vibe_pack_vibePack_installPack_parameter_2$schema
 							}
 						}
 					],
 					result: {
 						mode: "strict",
 						typeSymbol: "dsh-vibe-pack/types#InstallPlan",
-						schema: dsh_vibe_pack_vibePack_install_result$schema
+						schema: dsh_vibe_pack_vibePack_installPack_result$schema
 					},
 					sourceLocation: {
 						"file": "packages/dsh-vibe-pack/src/index.ts",
 						"line": 32,
-						"column": 28
+						"column": 32
 					}
 				},
 				{
@@ -4273,52 +4274,52 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
 			document.head.appendChild(tag);
 		}
 		var VibePack_module_css_default = {
-			"section": "B8kF5q_section",
-			"planList": "B8kF5q_planList",
-			"count": "B8kF5q_count",
+			"primary": "B8kF5q_primary",
+			"packMeta": "B8kF5q_packMeta",
+			"library": "B8kF5q_library",
 			"sectionHeading": "B8kF5q_sectionHeading",
+			"fieldLabel": "B8kF5q_fieldLabel",
+			"danger": "B8kF5q_danger",
+			"field": "B8kF5q_field",
+			"summary": "B8kF5q_summary",
+			"badge": "B8kF5q_badge",
+			"textInput": "B8kF5q_textInput",
+			"button": "B8kF5q_button",
+			"raw": "B8kF5q_raw",
+			"packCard": "B8kF5q_packCard",
+			"section": "B8kF5q_section",
 			"dangerZone": "B8kF5q_dangerZone",
-			"selectedPanel": "B8kF5q_selectedPanel",
+			"actions": "B8kF5q_actions",
+			"heroText": "B8kF5q_heroText",
+			"planGroup": "B8kF5q_planGroup",
+			"planList": "B8kF5q_planList",
+			"empty": "B8kF5q_empty",
+			"count": "B8kF5q_count",
+			"status": "B8kF5q_status",
+			"layout": "B8kF5q_layout",
 			"tableWrap": "B8kF5q_tableWrap",
-			"eyebrow": "B8kF5q_eyebrow",
+			"change": "B8kF5q_change",
+			"select": "B8kF5q_select",
 			"selectedId": "B8kF5q_selectedId",
 			"path": "B8kF5q_path",
-			"status": "B8kF5q_status",
-			"formGrid": "B8kF5q_formGrid",
-			"button": "B8kF5q_button",
-			"textInput": "B8kF5q_textInput",
-			"confirm": "B8kF5q_confirm",
-			"planItem": "B8kF5q_planItem",
-			"packHead": "B8kF5q_packHead",
-			"heroText": "B8kF5q_heroText",
-			"card": "B8kF5q_card",
-			"check": "B8kF5q_check",
-			"packMeta": "B8kF5q_packMeta",
-			"actions": "B8kF5q_actions",
-			"field": "B8kF5q_field",
-			"resultHeader": "B8kF5q_resultHeader",
-			"layout": "B8kF5q_layout",
-			"fieldLabel": "B8kF5q_fieldLabel",
-			"raw": "B8kF5q_raw",
-			"library": "B8kF5q_library",
-			"planGroup": "B8kF5q_planGroup",
-			"badge": "B8kF5q_badge",
-			"select": "B8kF5q_select",
-			"hero": "B8kF5q_hero",
-			"warning": "B8kF5q_warning",
-			"table": "B8kF5q_table",
-			"change": "B8kF5q_change",
 			"result": "B8kF5q_result",
-			"danger": "B8kF5q_danger",
-			"primary": "B8kF5q_primary",
+			"card": "B8kF5q_card",
+			"hero": "B8kF5q_hero",
+			"check": "B8kF5q_check",
 			"help": "B8kF5q_help",
-			"summary": "B8kF5q_summary",
-			"conflict": "B8kF5q_conflict",
-			"empty": "B8kF5q_empty",
-			"packCard": "B8kF5q_packCard",
+			"confirm": "B8kF5q_confirm",
+			"table": "B8kF5q_table",
 			"muted": "B8kF5q_muted",
+			"formGrid": "B8kF5q_formGrid",
+			"eyebrow": "B8kF5q_eyebrow",
 			"statusTitle": "B8kF5q_statusTitle",
-			"planGroups": "B8kF5q_planGroups"
+			"planItem": "B8kF5q_planItem",
+			"warning": "B8kF5q_warning",
+			"conflict": "B8kF5q_conflict",
+			"planGroups": "B8kF5q_planGroups",
+			"selectedPanel": "B8kF5q_selectedPanel",
+			"packHead": "B8kF5q_packHead",
+			"resultHeader": "B8kF5q_resultHeader"
 		};
 		//#endregion
 		//#region src/client/index.tsx
@@ -4332,7 +4333,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
 			return {
 				history: () => unwrap(raw.history()),
 				plan: (source) => unwrap(raw.plan(source)),
-				install: (source, force, expectedDigest) => unwrap(raw.install(source, force, expectedDigest)),
+				install: (source, force, expectedDigest) => unwrap(raw.installPack(source, force, expectedDigest)),
 				uninstall: (id, force) => unwrap(raw.uninstall(id, force)),
 				diff: (id) => unwrap(raw.diff(id)),
 				export: (id) => unwrap(raw.export(id))

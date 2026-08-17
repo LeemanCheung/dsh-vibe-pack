@@ -168,7 +168,7 @@ let VibePackService = (() => {
 			const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(_classSuper[Symbol.metadata] ?? null) : void 0;
 			_historyList_decorators = [Remote("history")];
 			_plan_decorators = [Remote("plan")];
-			_install_decorators = [Remote("install")];
+			_install_decorators = [Remote("installPack")];
 			_uninstall_decorators = [Remote("uninstall")];
 			_diff_decorators = [Remote("diff")];
 			_exportPack_decorators = [Remote("export")];

@@ -12,12 +12,19 @@ type RemoteResult<T> = { ok: true; value: T } | { ok: false; error: { message: s
 type RawApi = {
   history(): Promise<RemoteResult<PackLedger>>
   plan(source: SourceSpec): Promise<RemoteResult<InstallPlan>>
-  install(source: SourceSpec, force: boolean, expectedDigest: string): Promise<RemoteResult<InstallPlan>>
+  installPack(source: SourceSpec, force: boolean, expectedDigest: string): Promise<RemoteResult<InstallPlan>>
   uninstall(id: string, force: boolean): Promise<RemoteResult<void>>
   diff(id: string): Promise<RemoteResult<Change[]>>
   export(id: string): Promise<RemoteResult<string>>
 }
-type Api = { [K in keyof RawApi]: RawApi[K] extends (...args: infer Args) => Promise<RemoteResult<infer Value>> ? (...args: Args) => Promise<Value> : never }
+type Api = {
+  history(): Promise<PackLedger>
+  plan(source: SourceSpec): Promise<InstallPlan>
+  install(source: SourceSpec, force: boolean, expectedDigest: string): Promise<InstallPlan>
+  uninstall(id: string, force: boolean): Promise<void>
+  diff(id: string): Promise<Change[]>
+  export(id: string): Promise<string>
+}
 type Notice = { kind: 'info' | 'success' | 'error'; title: string; detail: string }
 type Result = { title: string; summary: string; raw: unknown; plan?: InstallPlan; diff?: Change[] }
 
@@ -29,7 +36,7 @@ async function unwrap<T>(pending: Promise<RemoteResult<T>>): Promise<T> {
 
 function apiFrom(raw: RawApi): Api {
   return {
-    history: () => unwrap(raw.history()), plan: source => unwrap(raw.plan(source)), install: (source, force, expectedDigest) => unwrap(raw.install(source, force, expectedDigest)),
+    history: () => unwrap(raw.history()), plan: source => unwrap(raw.plan(source)), install: (source, force, expectedDigest) => unwrap(raw.installPack(source, force, expectedDigest)),
     uninstall: (id, force) => unwrap(raw.uninstall(id, force)), diff: id => unwrap(raw.diff(id)), export: id => unwrap(raw.export(id)),
   }
 }

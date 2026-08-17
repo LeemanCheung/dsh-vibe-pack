@@ -29,7 +29,7 @@ export default class VibePackService extends TypertRemoteService {
   protected async [Service.init](): Promise<void> { const domain = await this.ctx.storageDomain.open(domainSpec); this.history = domain.table('history'); this.ctx.effect(() => () => domain.close(), 'vibe-pack: close storage domain') }
   @Remote('history') async historyList(): Promise<PackLedger> { return this.manager.history() }
   @Remote('plan') async plan(source: SourceSpec): Promise<InstallPlan> { return this.manager.plan(source) }
-  @Remote('install') async install(source: SourceSpec, force: boolean, expectedDigest: string): Promise<InstallPlan> { const result = await this.manager.install(source, { force, expectedDigest }); await this.audit('install', result.pack.id); return result }
+  @Remote('installPack') async install(source: SourceSpec, force: boolean, expectedDigest: string): Promise<InstallPlan> { const result = await this.manager.install(source, { force, expectedDigest }); await this.audit('install', result.pack.id); return result }
   @Remote('uninstall') async uninstall(id: string, force: boolean): Promise<void> { await this.manager.uninstall(id, { force }); await this.audit('uninstall', id) }
   @Remote('diff') async diff(id: string): Promise<Change[]> { return this.manager.diff(id) }
   @Remote('export') async exportPack(id: string): Promise<string> { return this.manager.export(id) }
