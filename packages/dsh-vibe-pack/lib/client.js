@@ -4273,52 +4273,52 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
 			document.head.appendChild(tag);
 		}
 		var VibePack_module_css_default = {
-			"table": "B8kF5q_table",
-			"actions": "B8kF5q_actions",
-			"dangerZone": "B8kF5q_dangerZone",
-			"field": "B8kF5q_field",
-			"planGroup": "B8kF5q_planGroup",
-			"path": "B8kF5q_path",
-			"muted": "B8kF5q_muted",
-			"hero": "B8kF5q_hero",
-			"packMeta": "B8kF5q_packMeta",
-			"statusTitle": "B8kF5q_statusTitle",
-			"selectedId": "B8kF5q_selectedId",
-			"tableWrap": "B8kF5q_tableWrap",
-			"count": "B8kF5q_count",
-			"badge": "B8kF5q_badge",
 			"section": "B8kF5q_section",
-			"result": "B8kF5q_result",
-			"layout": "B8kF5q_layout",
-			"library": "B8kF5q_library",
-			"fieldLabel": "B8kF5q_fieldLabel",
-			"select": "B8kF5q_select",
-			"button": "B8kF5q_button",
-			"confirm": "B8kF5q_confirm",
-			"primary": "B8kF5q_primary",
-			"raw": "B8kF5q_raw",
-			"warning": "B8kF5q_warning",
-			"eyebrow": "B8kF5q_eyebrow",
-			"textInput": "B8kF5q_textInput",
 			"planList": "B8kF5q_planList",
-			"packHead": "B8kF5q_packHead",
-			"formGrid": "B8kF5q_formGrid",
+			"count": "B8kF5q_count",
 			"sectionHeading": "B8kF5q_sectionHeading",
-			"heroText": "B8kF5q_heroText",
-			"check": "B8kF5q_check",
-			"summary": "B8kF5q_summary",
-			"card": "B8kF5q_card",
-			"packCard": "B8kF5q_packCard",
-			"planGroups": "B8kF5q_planGroups",
+			"dangerZone": "B8kF5q_dangerZone",
 			"selectedPanel": "B8kF5q_selectedPanel",
-			"resultHeader": "B8kF5q_resultHeader",
+			"tableWrap": "B8kF5q_tableWrap",
+			"eyebrow": "B8kF5q_eyebrow",
+			"selectedId": "B8kF5q_selectedId",
+			"path": "B8kF5q_path",
 			"status": "B8kF5q_status",
-			"danger": "B8kF5q_danger",
-			"help": "B8kF5q_help",
+			"formGrid": "B8kF5q_formGrid",
+			"button": "B8kF5q_button",
+			"textInput": "B8kF5q_textInput",
+			"confirm": "B8kF5q_confirm",
 			"planItem": "B8kF5q_planItem",
+			"packHead": "B8kF5q_packHead",
+			"heroText": "B8kF5q_heroText",
+			"card": "B8kF5q_card",
+			"check": "B8kF5q_check",
+			"packMeta": "B8kF5q_packMeta",
+			"actions": "B8kF5q_actions",
+			"field": "B8kF5q_field",
+			"resultHeader": "B8kF5q_resultHeader",
+			"layout": "B8kF5q_layout",
+			"fieldLabel": "B8kF5q_fieldLabel",
+			"raw": "B8kF5q_raw",
+			"library": "B8kF5q_library",
+			"planGroup": "B8kF5q_planGroup",
+			"badge": "B8kF5q_badge",
+			"select": "B8kF5q_select",
+			"hero": "B8kF5q_hero",
+			"warning": "B8kF5q_warning",
+			"table": "B8kF5q_table",
+			"change": "B8kF5q_change",
+			"result": "B8kF5q_result",
+			"danger": "B8kF5q_danger",
+			"primary": "B8kF5q_primary",
+			"help": "B8kF5q_help",
+			"summary": "B8kF5q_summary",
 			"conflict": "B8kF5q_conflict",
 			"empty": "B8kF5q_empty",
-			"change": "B8kF5q_change"
+			"packCard": "B8kF5q_packCard",
+			"muted": "B8kF5q_muted",
+			"statusTitle": "B8kF5q_statusTitle",
+			"planGroups": "B8kF5q_planGroups"
 		};
 		//#endregion
 		//#region src/client/index.tsx
@@ -4656,7 +4656,11 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
 		}
 		async function apply(ctx) {
 			const disposeRemote = await ctx.remote.$mount(TYPERT_REMOTE);
-			const raw = ctx.remote.vibePack;
+			const raw = ctx.get("remote.vibePack");
+			if (raw === void 0) {
+				await disposeRemote();
+				throw new Error("Vibe Pack Remote namespace did not mount");
+			}
 			const api = apiFrom(raw);
 			ctx.slots.inject("settings.section", () => ctx.slots.register({
 				name: "settings.section",

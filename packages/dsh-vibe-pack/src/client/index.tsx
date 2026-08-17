@@ -132,7 +132,11 @@ function VibePackSection({ api }: { api: Api }): React.ReactElement {
 
 export async function apply(ctx: ClientContext): Promise<() => Promise<void>> {
   const disposeRemote = await ctx.remote.$mount(vibePackRemote)
-  const raw = (ctx.remote as unknown as { vibePack: RawApi }).vibePack
+  const raw = ctx.get('remote.vibePack') as RawApi | undefined
+  if (raw === undefined) {
+    await disposeRemote()
+    throw new Error('Vibe Pack Remote namespace did not mount')
+  }
   const api = apiFrom(raw)
   ctx.slots.inject('settings.section', () => ctx.slots.register({ name: 'settings.section', id: 'vibe-pack', order: 35, label: () => 'Vibe Pack', inject: () => ({ api }) }, VibePackSection))
   return disposeRemote
