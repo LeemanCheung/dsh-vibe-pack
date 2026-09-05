@@ -62,7 +62,7 @@ The transaction lock fails loud after an unclean process exit and may need manua
 
 From the repository root run `corepack pnpm typecheck`, `corepack pnpm test`, `corepack pnpm build`, and `corepack pnpm pack:check`. See [TEST_PLAN.md](TEST_PLAN.md) for security acceptance cases.
 
-Version 1.0.1 is built and statically checked against the DSH 0.1.2-rc.1 public Host and Renderer APIs. Final compatibility still requires loading it in the target DSH profile.
+Version 1.0.1 is marked compatible with the DSH 0.1.2-rc.1 `web` profile after Windows QA loaded its Host service, browser Client, generated Remote namespace, and Settings section in both the isolated QA instance on port 3081 and the existing local profile on port 3080. The Settings panel successfully loaded an empty ledger. Automated coverage contains 14 passing tests, including existing and missing-target junction escapes.
 CI is configured to rebuild the committed `lib` artifacts on both Windows and Linux and reject any tracked or untracked difference.
 
 MIT. See [LICENSE](LICENSE).

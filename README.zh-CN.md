@@ -62,7 +62,7 @@ dsh plugin --profile web add github:LeemanCheung/dsh-vibe-pack
 
 在仓库根目录运行 `corepack pnpm typecheck`、`corepack pnpm test`、`corepack pnpm build` 和 `corepack pnpm pack:check`。安全验收用例见 [TEST_PLAN.md](TEST_PLAN.md)。
 
-1.0.1 已针对 DSH 0.1.2-rc.1 的公开 Host 与 Renderer API 完成构建和静态检查；最终兼容性仍需在目标 DSH Profile 中加载验证。
+1.0.1 已标记兼容 DSH 0.1.2-rc.1 的 `web` Profile。Windows 实测已在 3081 隔离 QA 实例和 3080 现有本地 Profile 中加载 Host 服务、浏览器 Client、生成的 Remote 命名空间和 Settings 面板；面板成功显示账本已加载且当前为 0 个包。自动化覆盖共 14 项测试，包括目标存在与不存在时的目录联接越界。
 CI 已配置为在 Windows 和 Linux 上重新构建已提交的 `lib` 产物；任何已跟踪或未跟踪差异都会使检查失败。
 
 MIT，见 [LICENSE](LICENSE)。
