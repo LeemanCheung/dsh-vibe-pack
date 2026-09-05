@@ -1,4 +1,4 @@
-import { C as checkCompatibility, S as assertCompatibility, _ as containedPath, a as parsePackV1, b as hashesEqual, c as OwnershipGraph, d as exportCheckpoint, f as SecurityError, g as containedExistingPath, h as assertSafeRelativePath, i as PackSchemaV1, l as checkpoint, m as assertNoSecrets, n as resolveSource, o as SafeYamlError, p as assertDataOnlySource, r as PackFileSchema, s as parseSafeYaml, t as PackManager, u as diffCheckpoints, v as containedWritablePath, x as sha256, y as findSecrets } from "./manager-B4FZJ9E1.js";
+import { C as checkCompatibility, S as assertCompatibility, _ as containedPath, a as parsePackV1, b as hashesEqual, c as OwnershipGraph, d as exportCheckpoint, f as SecurityError, g as containedExistingPath, h as assertSafeRelativePath, i as PackSchemaV1, l as checkpoint, m as assertNoSecrets, n as resolveSource, o as SafeYamlError, p as assertDataOnlySource, r as PackFileSchema, s as parseSafeYaml, t as PackManager, u as diffCheckpoints, v as containedWritablePath, x as sha256, y as findSecrets } from "./manager.js";
 import { Service } from "@deepseek-ai/cordis";
 import { Remote, TypertRemoteService } from "@deepseek-ai/dsh-typert-protocol";
 import { defineDomain, domainTable } from "@deepseek-ai/dsh-storage-domain";
@@ -73,34 +73,35 @@ var MemoryAdapter = class {
 /** One root-contained, reversible filesystem mutation. Undefined content deletes a file. */
 var FileMutationAdapter = class {
 	root;
-	target;
 	constructor(root, mutation) {
 		this.root = root;
-		this.target = containedPath(root, assertSafeRelativePath(mutation.path));
+		assertSafeRelativePath(mutation.path);
 		this.mutation = mutation;
 	}
 	mutation;
 	async snapshot() {
 		try {
-			return { content: new Uint8Array(await readFile(this.target)) };
+			return { content: new Uint8Array(await readFile(await containedExistingPath(this.root, this.mutation.path))) };
 		} catch (error) {
 			if (error.code === "ENOENT") return {};
 			throw error;
 		}
 	}
 	async restore(snapshot) {
-		if (snapshot.content) await this.writeAtomic(snapshot.content);
-		else await rm(this.target, { force: true });
+		const target = await containedWritablePath(this.root, this.mutation.path);
+		if (snapshot.content) await this.writeAtomic(target, snapshot.content);
+		else await rm(target, { force: true });
 	}
 	async apply() {
-		if (this.mutation.content) await this.writeAtomic(this.mutation.content);
-		else await rm(this.target, { force: true });
+		const target = await containedWritablePath(this.root, this.mutation.path);
+		if (this.mutation.content) await this.writeAtomic(target, this.mutation.content);
+		else await rm(target, { force: true });
 	}
-	async writeAtomic(content) {
-		await mkdir(dirname(this.target), { recursive: true });
-		const temporary = `${this.target}.dsh-pack-${process.pid}-${Date.now()}.tmp`;
+	async writeAtomic(target, content) {
+		await mkdir(dirname(target), { recursive: true });
+		const temporary = `${target}.dsh-pack-${process.pid}-${Date.now()}.tmp`;
 		await writeFile(temporary, content, { flag: "wx" });
-		await rename(temporary, this.target);
+		await rename(temporary, target);
 	}
 };
 //#endregion

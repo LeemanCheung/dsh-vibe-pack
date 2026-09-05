@@ -116,8 +116,6 @@ declare class PackManager {
     dsh: string;
     node: string;
   });
-  private get stateRoot();
-  private get statePath();
   inspect(source: SourceSpec): Promise<{
     pack: PackV1;
     files: Map<string, Uint8Array>;
@@ -140,6 +138,7 @@ declare class PackManager {
   private capture;
   private backup;
   private restoreBackup;
+  private readManaged;
   private withLock;
   private serialize;
 }
@@ -243,7 +242,6 @@ type Prior = {
 /** One root-contained, reversible filesystem mutation. Undefined content deletes a file. */
 declare class FileMutationAdapter implements TransactionAdapter<Prior> {
   private readonly root;
-  private readonly target;
   constructor(root: string, mutation: FileMutation);
   private readonly mutation;
   snapshot(): Promise<Prior>;

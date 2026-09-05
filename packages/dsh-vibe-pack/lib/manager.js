@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { mkdir, readFile, readdir, realpath, rename, rm, stat, writeFile } from "node:fs/promises";
+import { lstat, mkdir, readFile, readdir, realpath, rename, rm, stat, writeFile } from "node:fs/promises";
 import { basename, dirname, extname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { unzipSync, zipSync } from "fflate";
 import { JSON_SCHEMA, dump, load } from "js-yaml";
@@ -47,24 +47,47 @@ function containedPath(root, candidate) {
 	if (rel === "" || rel === ".." || rel.startsWith(`..${sep}`) || isAbsolute(rel)) throw new SecurityError(`path escapes root: ${candidate}`);
 	return resolvedCandidate;
 }
+function assertRealPathContained(realRoot, realCandidate, message) {
+	const rel = relative(realRoot, realCandidate);
+	if (rel === ".." || rel.startsWith(`..${sep}`) || isAbsolute(rel)) throw new SecurityError(message);
+}
+async function nearestExistingAncestor(path) {
+	let current = path;
+	for (;;) try {
+		return await realpath(current);
+	} catch (error) {
+		if (!(error instanceof Error && "code" in error && error.code === "ENOENT")) throw error;
+		const parent = dirname(current);
+		if (parent === current) throw error;
+		current = parent;
+	}
+}
 /** Creates and resolves a destination parent, rejecting symlink escapes before writes. */
 async function containedWritablePath(root, candidate) {
 	const resolvedRoot = resolve(root);
 	await mkdir(resolvedRoot, { recursive: true });
 	const lexical = containedPath(resolvedRoot, candidate);
-	await mkdir(dirname(lexical), { recursive: true });
 	const realRoot = await realpath(resolvedRoot);
+	assertRealPathContained(realRoot, await nearestExistingAncestor(dirname(lexical)), `destination parent escapes root: ${candidate}`);
+	await mkdir(dirname(lexical), { recursive: true });
 	const realParent = await realpath(dirname(lexical));
-	const rel = relative(realRoot, realParent);
-	if (rel === ".." || rel.startsWith(`..${sep}`) || isAbsolute(rel)) throw new SecurityError(`destination parent escapes root: ${candidate}`);
-	return join(realParent, basename(lexical));
+	assertRealPathContained(realRoot, realParent, `destination parent escapes root: ${candidate}`);
+	const target = join(realParent, basename(lexical));
+	try {
+		if ((await lstat(target)).isSymbolicLink()) throw new SecurityError(`destination is a symbolic link: ${candidate}`);
+		assertRealPathContained(realRoot, await realpath(target), `destination escapes root: ${candidate}`);
+	} catch (error) {
+		if (!(error instanceof Error && "code" in error && error.code === "ENOENT")) throw error;
+	}
+	return target;
 }
 /** Resolves symlinks and verifies the resulting existing file is still inside root. */
 async function containedExistingPath(root, candidate) {
-	const realRoot = await realpath(root);
-	const realCandidate = await realpath(containedPath(realRoot, candidate));
-	const rel = relative(realRoot, realCandidate);
-	if (rel === ".." || rel.startsWith(`..${sep}`) || isAbsolute(rel)) throw new SecurityError(`symlink escapes root: ${candidate}`);
+	const resolvedRoot = resolve(root);
+	const lexical = containedPath(resolvedRoot, candidate);
+	const realRoot = await realpath(resolvedRoot);
+	const realCandidate = await realpath(lexical);
+	assertRealPathContained(realRoot, realCandidate, `path escapes root through a symbolic link or junction: ${candidate}`);
 	return realCandidate;
 }
 const SECRET_KEY = /(?:^|[_-])(token|secret|password|passwd|api[_-]?key|private[_-]?key)(?:$|[_-])/i;
@@ -337,17 +360,11 @@ var PackManager = class {
 	runtime;
 	mutations = Promise.resolve();
 	constructor(root, runtime = {
-		dsh: "0.1.0-rc.6",
+		dsh: "0.1.2-rc.1",
 		node: process.versions.node
 	}) {
 		this.root = root;
 		this.runtime = runtime;
-	}
-	get stateRoot() {
-		return join(this.root, ".dsh-vibe-pack");
-	}
-	get statePath() {
-		return join(this.stateRoot, "ledger.json");
 	}
 	async inspect(source) {
 		const resolved = await resolveSource(source);
@@ -383,7 +400,7 @@ var PackManager = class {
 		const graph = new OwnershipGraph(Object.fromEntries(Object.entries(ledger.packs).map(([id, entry]) => [id, Object.keys(entry.files)])));
 		const items = [];
 		for (const file of info.pack.files) {
-			const existing = await readOptional(containedPath(this.root, file.path));
+			const existing = await this.readManaged(file.path);
 			const owner = graph.ownerOf(file.path);
 			let conflict;
 			if (existing !== void 0) {
@@ -429,7 +446,7 @@ var PackManager = class {
 					if (owner === info.pack.id) continue;
 					for (const path of paths) delete entry.files[path];
 				}
-				const files = Object.fromEntries(await Promise.all(paths.map(async (path) => [path, sha256$1(await readFile(containedPath(this.root, path)))])));
+				const files = Object.fromEntries(await Promise.all(paths.map(async (path) => [path, sha256$1(await readFile(await containedExistingPath(this.root, path)))])));
 				ledger.packs[info.pack.id] = {
 					version: info.pack.version,
 					sourceDigest: info.digest,
@@ -457,7 +474,7 @@ var PackManager = class {
 			try {
 				for (const [path, expected] of Object.entries(installed.files)) {
 					const target = await containedWritablePath(this.root, path);
-					const current = await readOptional(target);
+					const current = await this.readManaged(path);
 					if (current !== void 0 && sha256$1(current) !== expected && !options.force) throw new SecurityError(`modified resource protected: ${path}`);
 					await rm(target, { force: true });
 				}
@@ -488,7 +505,7 @@ var PackManager = class {
 		const payloads = {};
 		const files = [];
 		for (const [path, expected] of Object.entries(installed.files)) {
-			const content = await readOptional(containedPath(this.root, path));
+			const content = await this.readManaged(path);
 			if (content === void 0) throw new SecurityError(`installed resource is missing: ${path}`);
 			const digest = sha256$1(content);
 			if (digest !== expected) throw new SecurityError(`modified resource protected: ${path}`);
@@ -521,7 +538,7 @@ var PackManager = class {
 	}
 	async ledger() {
 		try {
-			const parsed = JSON.parse(await readFile(this.statePath, "utf8"));
+			const parsed = JSON.parse(await readFile(await containedExistingPath(this.root, ".dsh-vibe-pack/ledger.json"), "utf8"));
 			if (!isLedger(parsed)) throw new SecurityError("Vibe Pack ledger is invalid");
 			return parsed;
 		} catch (error) {
@@ -537,7 +554,7 @@ var PackManager = class {
 		for (const [id, entry] of Object.entries(ledger.packs)) owners[id] = Object.keys(entry.files);
 		const files = [];
 		for (const path of paths) {
-			const content = await readOptional(containedPath(this.root, path));
+			const content = await this.readManaged(path);
 			if (content !== void 0) files.push({
 				path,
 				content
@@ -547,7 +564,7 @@ var PackManager = class {
 	}
 	async backup(paths) {
 		const result = /* @__PURE__ */ new Map();
-		for (const path of paths) result.set(path, await readOptional(containedPath(this.root, path)));
+		for (const path of paths) result.set(path, await this.readManaged(path));
 		return result;
 	}
 	async restoreBackup(backup) {
@@ -560,6 +577,14 @@ var PackManager = class {
 			failure ??= error;
 		}
 		return failure;
+	}
+	async readManaged(path) {
+		try {
+			return new Uint8Array(await readFile(await containedExistingPath(this.root, assertSafeRelativePath(path))));
+		} catch (error) {
+			if (isMissing(error)) return void 0;
+			throw error;
+		}
 	}
 	async withLock(operation) {
 		const lockPath = await containedWritablePath(this.root, ".dsh-vibe-pack/transaction.lock");
@@ -700,4 +725,4 @@ function isLedger(value) {
 //#endregion
 export { checkCompatibility as C, assertCompatibility as S, containedPath as _, parsePackV1 as a, hashesEqual as b, OwnershipGraph as c, exportCheckpoint as d, SecurityError as f, containedExistingPath as g, assertSafeRelativePath as h, PackSchemaV1 as i, checkpoint as l, assertNoSecrets as m, resolveSource as n, SafeYamlError as o, assertDataOnlySource as p, PackFileSchema as r, parseSafeYaml as s, PackManager as t, diffCheckpoints as u, containedWritablePath as v, sha256$1 as x, findSecrets as y };
 
-//# sourceMappingURL=manager-B4FZJ9E1.js.map
+//# sourceMappingURL=manager.js.map

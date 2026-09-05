@@ -13,7 +13,7 @@
 | IN-01 | Change one payload byte after calculating its manifest SHA-256. | Hash mismatch before writes; root and ledger unchanged. |
 | IN-02 | Use malformed YAML, an unknown schema version, an unknown field, or a missing per-file digest. | Strict validation failure; no ledger entry. |
 | AR-01 | Use traversal, absolute, empty-segment, duplicate case-folded, oversized, or excess ZIP entries. | Archive rejection before payload use; no write outside root. |
-| AR-02 | Use a source directory containing a symlink or a target parent symlink escaping the root. | Symlink rejection; external target unchanged. |
+| AR-02 | Use a source symlink, a managed file symlink, or a target parent symlink/Windows junction escaping the root. | Preview, read, backup, export, directory creation, mutation, and ledger access reject the escape; external target remains unchanged. |
 | DA-01 | Include script/process/import syntax, a YAML alias/tag/anchor, prototype key, or credential-like key/value. | Data-only validation failure; no process, network, module, or write side effect. |
 | OW-01 | Install Pack A owning `R`; plan Pack B over `R`. | Conflict names Pack A; install requires explicit force. |
 | OW-02 | Place an unowned file at `R`; plan a replacing pack. | Conflict reports an existing unowned resource; default install rejects. |
@@ -26,7 +26,7 @@
 
 ## Automated coverage
 
-`tests/security.test.ts` covers YAML, traversal, transaction rollback, and ownership primitives. `tests/manager.test.ts` covers verified install, durable history, modification protection, unowned conflicts, hash mismatch, and export/import round-trip. Run all package tests with `corepack pnpm test` from the workspace root.
+`tests/security.test.ts` covers YAML, traversal, transaction rollback, and ownership primitives. `tests/manager.test.ts` covers verified install, durable history, modification protection, unowned conflicts, Windows junction containment, hash mismatch, and export/import round-trip. Run all package tests with `corepack pnpm test` from the workspace root.
 
 ## Release checks
 

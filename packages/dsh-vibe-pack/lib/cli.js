@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { t as PackManager } from "./manager-B4FZJ9E1.js";
+import { t as PackManager } from "./manager.js";
 import { dshHomePath } from "@deepseek-ai/dsh-home-paths";
 import { Command } from "commander";
 //#region src/cli.ts

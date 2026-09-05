@@ -1,5 +1,5 @@
 import { mkdir, readFile, rename, rm, stat, writeFile } from 'node:fs/promises'
-import { dirname, extname, join } from 'node:path'
+import { dirname, extname } from 'node:path'
 import { zipSync } from 'fflate'
 import { dump as dumpYaml } from 'js-yaml'
 import { assertCompatibility } from './compat.js'
@@ -7,7 +7,7 @@ import { checkpoint, diffCheckpoints, type Change, type Checkpoint } from './lif
 import { OwnershipGraph } from './ownership.js'
 import { parseSafeYaml } from './safe-yaml.js'
 import { parsePackV1, type PackV1 } from './schema.js'
-import { assertDataOnlySource, assertNoSecrets, assertSafeRelativePath, containedPath, containedWritablePath, hashesEqual, sha256, SecurityError } from './security.js'
+import { assertDataOnlySource, assertNoSecrets, assertSafeRelativePath, containedExistingPath, containedWritablePath, hashesEqual, sha256, SecurityError } from './security.js'
 import { resolveSource, type SourceSpec } from './source.js'
 
 export type PlanItem = { path: string; action: 'create' | 'replace' | 'merge'; conflict?: string }
@@ -21,10 +21,7 @@ const emptyPackLedger = (): PackLedger => ({ version: 1, packs: {} })
 export class PackManager {
   private mutations: Promise<void> = Promise.resolve()
 
-  constructor(readonly root: string, readonly runtime = { dsh: '0.1.0-rc.6', node: process.versions.node }) {}
-
-  private get stateRoot(): string { return join(this.root, '.dsh-vibe-pack') }
-  private get statePath(): string { return join(this.stateRoot, 'ledger.json') }
+  constructor(readonly root: string, readonly runtime = { dsh: '0.1.2-rc.1', node: process.versions.node }) {}
 
   async inspect(source: SourceSpec): Promise<{ pack: PackV1; files: Map<string, Uint8Array>; digest: string }> {
     const resolved = await resolveSource(source)
@@ -59,8 +56,7 @@ export class PackManager {
     const graph = new OwnershipGraph(Object.fromEntries(Object.entries(ledger.packs).map(([id, entry]) => [id, Object.keys(entry.files)])))
     const items: PlanItem[] = []
     for (const file of info.pack.files) {
-      const target = containedPath(this.root, file.path)
-      const existing = await readOptional(target)
+      const existing = await this.readManaged(file.path)
       const owner = graph.ownerOf(file.path)
       let conflict: string | undefined
       if (existing !== undefined) {
@@ -103,7 +99,7 @@ export class PackManager {
             for (const path of paths) delete entry.files[path]
           }
         }
-        const files = Object.fromEntries(await Promise.all(paths.map(async path => [path, sha256(await readFile(containedPath(this.root, path)))] as const)))
+        const files = Object.fromEntries(await Promise.all(paths.map(async path => [path, sha256(await readFile(await containedExistingPath(this.root, path)))] as const)))
         ledger.packs[info.pack.id] = { version: info.pack.version, sourceDigest: info.digest, files, checkpoint: before }
         await this.save(ledger)
         return plan
@@ -124,7 +120,7 @@ export class PackManager {
       try {
         for (const [path, expected] of Object.entries(installed.files)) {
           const target = await containedWritablePath(this.root, path)
-          const current = await readOptional(target)
+          const current = await this.readManaged(path)
           if (current !== undefined && sha256(current) !== expected && !options.force) throw new SecurityError(`modified resource protected: ${path}`)
           await rm(target, { force: true })
         }
@@ -156,7 +152,7 @@ export class PackManager {
     const payloads: Record<string, Uint8Array> = {}
     const files = []
     for (const [path, expected] of Object.entries(installed.files)) {
-      const content = await readOptional(containedPath(this.root, path))
+      const content = await this.readManaged(path)
       if (content === undefined) throw new SecurityError(`installed resource is missing: ${path}`)
       const digest = sha256(content)
       if (digest !== expected) throw new SecurityError(`modified resource protected: ${path}`)
@@ -170,7 +166,7 @@ export class PackManager {
 
   private async ledger(): Promise<PackLedger> {
     try {
-      const parsed = JSON.parse(await readFile(this.statePath, 'utf8')) as unknown
+      const parsed = JSON.parse(await readFile(await containedExistingPath(this.root, '.dsh-vibe-pack/ledger.json'), 'utf8')) as unknown
       if (!isLedger(parsed)) throw new SecurityError('Vibe Pack ledger is invalid')
       return parsed
     } catch (error) {
@@ -189,7 +185,7 @@ export class PackManager {
     for (const [id, entry] of Object.entries(ledger.packs)) owners[id] = Object.keys(entry.files)
     const files: Array<{ path: string; content: Uint8Array }> = []
     for (const path of paths) {
-      const content = await readOptional(containedPath(this.root, path))
+      const content = await this.readManaged(path)
       if (content !== undefined) files.push({ path, content })
     }
     return checkpoint(files, owners)
@@ -197,7 +193,7 @@ export class PackManager {
 
   private async backup(paths: Iterable<string>): Promise<Map<string, Uint8Array | undefined>> {
     const result = new Map<string, Uint8Array | undefined>()
-    for (const path of paths) result.set(path, await readOptional(containedPath(this.root, path)))
+    for (const path of paths) result.set(path, await this.readManaged(path))
     return result
   }
 
@@ -213,6 +209,11 @@ export class PackManager {
       }
     }
     return failure
+  }
+
+  private async readManaged(path: string): Promise<Uint8Array | undefined> {
+    try { return new Uint8Array(await readFile(await containedExistingPath(this.root, assertSafeRelativePath(path)))) }
+    catch (error) { if (isMissing(error)) return undefined; throw error }
   }
 
   private async withLock<T>(operation: () => Promise<T>): Promise<T> {

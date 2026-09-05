@@ -22,6 +22,8 @@
 
 安装和卸载会串行执行，并使用磁盘事务锁。固定顺序原子写入前会备份每个目标；失败后按逆序恢复，并报告部分回滚错误。账本原子写入 `$DSH_HOME/.dsh-vibe-pack/ledger.json`。卸载默认保护被用户修改的资源。
 
+每次读取和修改受管资源前都会解析真实文件系统位置。若符号链接或 Windows 目录联接指向所配置 DSH 根目录之外，预览、备份、导出、建目录、写入和删除都会提前拒绝。
+
 Merge 模式只接受 JSON 或 YAML 对象：递归合并对象键，替换数组和标量，拒绝原型键和密钥，并输出确定性数据。导出会先确认已安装资源仍与账本一致，再生成可移植 `.dshpack` 归档。
 
 ## UI 与 CLI
@@ -59,5 +61,7 @@ dsh plugin --profile web add github:LeemanCheung/dsh-vibe-pack
 ## 开发
 
 在仓库根目录运行 `corepack pnpm typecheck`、`corepack pnpm test`、`corepack pnpm build` 和 `corepack pnpm pack:check`。安全验收用例见 [TEST_PLAN.md](TEST_PLAN.md)。
+
+1.0.1 已针对 DSH 0.1.2-rc.1 的公开 Host 与 Renderer API 完成构建和静态检查；最终兼容性仍需在目标 DSH Profile 中加载验证。
 
 MIT，见 [LICENSE](LICENSE)。

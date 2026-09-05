@@ -22,6 +22,8 @@ Preview reports create/replace/merge actions and conflicts. Existing unowned fil
 
 Install and uninstall are serialized and guarded by an on-disk transaction lock. Each target is backed up before fixed-order atomic writes. Failed operations restore targets in reverse order and report partial rollback errors. The ledger is written atomically at `$DSH_HOME/.dsh-vibe-pack/ledger.json`. Uninstall protects modified resources unless force is explicit.
 
+Every managed read and mutation resolves the real filesystem location first. A symbolic link or Windows junction that leaves the configured DSH root is rejected before preview, backup, export, directory creation, write, or removal.
+
 Merge mode accepts JSON or YAML objects, recursively merges object keys, replaces arrays/scalars, rejects prototype keys and secrets, and emits deterministic data. Export verifies that installed resources still match the ledger and produces a portable `.dshpack` archive.
 
 ## UI and CLI
@@ -59,5 +61,7 @@ The transaction lock fails loud after an unclean process exit and may need manua
 ## Development
 
 From the repository root run `corepack pnpm typecheck`, `corepack pnpm test`, `corepack pnpm build`, and `corepack pnpm pack:check`. See [TEST_PLAN.md](TEST_PLAN.md) for security acceptance cases.
+
+Version 1.0.1 is built and statically checked against the DSH 0.1.2-rc.1 public Host and Renderer APIs. Final compatibility still requires loading it in the target DSH profile.
 
 MIT. See [LICENSE](LICENSE).

@@ -1,5 +1,5 @@
 import { createHash, timingSafeEqual } from 'node:crypto'
-import { mkdir, realpath } from 'node:fs/promises'
+import { lstat, mkdir, realpath } from 'node:fs/promises'
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path'
 
 export class SecurityError extends Error {}
@@ -21,25 +21,54 @@ export function containedPath(root: string, candidate: string): string {
   if (rel === '' || rel === '..' || rel.startsWith(`..${sep}`) || isAbsolute(rel)) throw new SecurityError(`path escapes root: ${candidate}`)
   return resolvedCandidate
 }
+
+function assertRealPathContained(realRoot: string, realCandidate: string, message: string): void {
+  const rel = relative(realRoot, realCandidate)
+  if (rel === '..' || rel.startsWith(`..${sep}`) || isAbsolute(rel)) throw new SecurityError(message)
+}
+
+async function nearestExistingAncestor(path: string): Promise<string> {
+  let current = path
+  for (;;) {
+    try { return await realpath(current) }
+    catch (error) {
+      if (!(error instanceof Error && 'code' in error && (error as NodeJS.ErrnoException).code === 'ENOENT')) throw error
+      const parent = dirname(current)
+      if (parent === current) throw error
+      current = parent
+    }
+  }
+}
+
 /** Creates and resolves a destination parent, rejecting symlink escapes before writes. */
 export async function containedWritablePath(root: string, candidate: string): Promise<string> {
   const resolvedRoot = resolve(root)
   await mkdir(resolvedRoot, { recursive: true })
   const lexical = containedPath(resolvedRoot, candidate)
-  await mkdir(dirname(lexical), { recursive: true })
   const realRoot = await realpath(resolvedRoot)
+  const existingAncestor = await nearestExistingAncestor(dirname(lexical))
+  assertRealPathContained(realRoot, existingAncestor, `destination parent escapes root: ${candidate}`)
+  await mkdir(dirname(lexical), { recursive: true })
   const realParent = await realpath(dirname(lexical))
-  const rel = relative(realRoot, realParent)
-  if (rel === '..' || rel.startsWith(`..${sep}`) || isAbsolute(rel)) throw new SecurityError(`destination parent escapes root: ${candidate}`)
-  return join(realParent, basename(lexical))
+  assertRealPathContained(realRoot, realParent, `destination parent escapes root: ${candidate}`)
+  const target = join(realParent, basename(lexical))
+  try {
+    const info = await lstat(target)
+    if (info.isSymbolicLink()) throw new SecurityError(`destination is a symbolic link: ${candidate}`)
+    assertRealPathContained(realRoot, await realpath(target), `destination escapes root: ${candidate}`)
+  } catch (error) {
+    if (!(error instanceof Error && 'code' in error && (error as NodeJS.ErrnoException).code === 'ENOENT')) throw error
+  }
+  return target
 }
 
 /** Resolves symlinks and verifies the resulting existing file is still inside root. */
 export async function containedExistingPath(root: string, candidate: string): Promise<string> {
-  const realRoot = await realpath(root)
-  const realCandidate = await realpath(containedPath(realRoot, candidate))
-  const rel = relative(realRoot, realCandidate)
-  if (rel === '..' || rel.startsWith(`..${sep}`) || isAbsolute(rel)) throw new SecurityError(`symlink escapes root: ${candidate}`)
+  const resolvedRoot = resolve(root)
+  const lexical = containedPath(resolvedRoot, candidate)
+  const realRoot = await realpath(resolvedRoot)
+  const realCandidate = await realpath(lexical)
+  assertRealPathContained(realRoot, realCandidate, `path escapes root through a symbolic link or junction: ${candidate}`)
   return realCandidate
 }
 

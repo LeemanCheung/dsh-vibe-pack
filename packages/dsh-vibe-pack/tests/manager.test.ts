@@ -1,4 +1,4 @@
-import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises'
+import { mkdtemp, mkdir, readFile, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -68,6 +68,17 @@ describe('PackManager lifecycle', () => {
     const plan = await manager.plan({ kind: 'directory', path: source })
     expect(plan.warnings[0]).toContain('unowned')
     await expect(manager.install({ kind: 'directory', path: source })).rejects.toThrow('conflicts require force')
+  })
+
+  it('rejects a managed directory junction that escapes the DSH root', async () => {
+    const { root, source, manager } = await fixture()
+    const outside = await mkdtemp(join(tmpdir(), 'vibe-outside-'))
+    temporary.push(outside)
+    await writeFile(join(outside, 'demo.json'), '{"outside":true}\n')
+    await symlink(outside, join(root, 'config'), 'junction')
+
+    await expect(manager.plan({ kind: 'directory', path: source })).rejects.toThrow('escapes root')
+    await expect(readFile(join(outside, 'demo.json'), 'utf8')).resolves.toBe('{"outside":true}\n')
   })
 
   it('rejects a changed payload whose hash no longer matches', async () => {

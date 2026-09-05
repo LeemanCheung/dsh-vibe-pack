@@ -2,21 +2,17 @@
 
 All notable changes to this project are documented in this file.
 
-## [Unreleased]
+## [1.0.1] - 2026-09-05
 
-### Added
+### Fixed
 
-- English and Simplified Chinese project documentation.
-- A security-focused acceptance plan covering malicious inputs, transactional rollback, and resource ownership.
-- MIT license text.
-
-### Security posture
-
-- Documentation establishes a fail-loud expectation for unsupported, malformed, unverifiable, conflicting, and non-owned operations.
-- This entry does not claim an implementation of integrity, rollback, or ownership controls; the current checkout contains package metadata only.
+- Reject managed reads, writes, backups, exports, and ledger access when a symbolic link or Windows junction escapes the configured DSH root.
+- Validate existing ancestors before creating destination directories, preventing a junction from redirecting even preliminary directory creation.
+- Migrate the browser client from the removed `dsh-client-runtime` package to the DSH 0.1.2 Renderer/Cordis API.
+- Make Host and Client builds independent of the invoking directory, use stable chunk names and CSS module inputs, and reject stale or machine-specific release artifacts.
 
 ## [1.0.0] - 2026-03-09
 
 ### Added
 
-- Initial package metadata for transactional, data-only DSH configuration packs.
+- Transactional, data-only DSH configuration packs with bilingual documentation, integrity checks, rollback, ownership tracking, and security acceptance coverage.
