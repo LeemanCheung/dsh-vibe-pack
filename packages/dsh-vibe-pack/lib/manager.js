@@ -86,7 +86,14 @@ async function containedExistingPath(root, candidate) {
 	const resolvedRoot = resolve(root);
 	const lexical = containedPath(resolvedRoot, candidate);
 	const realRoot = await realpath(resolvedRoot);
-	const realCandidate = await realpath(lexical);
+	let realCandidate;
+	try {
+		realCandidate = await realpath(lexical);
+	} catch (error) {
+		if (!(error instanceof Error && "code" in error && error.code === "ENOENT")) throw error;
+		assertRealPathContained(realRoot, await nearestExistingAncestor(dirname(lexical)), `path escapes root through a symbolic link or junction: ${candidate}`);
+		throw error;
+	}
 	assertRealPathContained(realRoot, realCandidate, `path escapes root through a symbolic link or junction: ${candidate}`);
 	return realCandidate;
 }

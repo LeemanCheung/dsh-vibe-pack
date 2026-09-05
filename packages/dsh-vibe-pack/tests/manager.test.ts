@@ -81,6 +81,15 @@ describe('PackManager lifecycle', () => {
     await expect(readFile(join(outside, 'demo.json'), 'utf8')).resolves.toBe('{"outside":true}\n')
   })
 
+  it('rejects an empty escaping junction instead of planning a missing file as creatable', async () => {
+    const { root, source, manager } = await fixture()
+    const outside = await mkdtemp(join(tmpdir(), 'vibe-empty-outside-'))
+    temporary.push(outside)
+    await symlink(outside, join(root, 'config'), 'junction')
+
+    await expect(manager.plan({ kind: 'directory', path: source })).rejects.toThrow('escapes root')
+  })
+
   it('rejects a changed payload whose hash no longer matches', async () => {
     const { source, manager } = await fixture()
     await writeFile(join(source, 'config', 'demo.json'), '{"tampered":true}\n')

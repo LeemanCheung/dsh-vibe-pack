@@ -10,6 +10,7 @@ All notable changes to this project are documented in this file.
 - Validate existing ancestors before creating destination directories, preventing a junction from redirecting even preliminary directory creation.
 - Migrate the browser client from the removed `dsh-client-runtime` package to the DSH 0.1.2 Renderer/Cordis API.
 - Make Host and Client builds independent of the invoking directory, use stable chunk names and CSS module inputs, and reject stale or machine-specific release artifacts.
+- Rebuild committed release artifacts on Windows and Linux CI and fail when tracked or untracked output differs.
 
 ## [1.0.0] - 2026-03-09
 

@@ -63,5 +63,6 @@ The transaction lock fails loud after an unclean process exit and may need manua
 From the repository root run `corepack pnpm typecheck`, `corepack pnpm test`, `corepack pnpm build`, and `corepack pnpm pack:check`. See [TEST_PLAN.md](TEST_PLAN.md) for security acceptance cases.
 
 Version 1.0.1 is built and statically checked against the DSH 0.1.2-rc.1 public Host and Renderer APIs. Final compatibility still requires loading it in the target DSH profile.
+CI is configured to rebuild the committed `lib` artifacts on both Windows and Linux and reject any tracked or untracked difference.
 
 MIT. See [LICENSE](LICENSE).
